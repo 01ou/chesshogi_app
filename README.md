@@ -52,4 +52,3 @@ export default tseslint.config({
 # chesshogi_app
 # chesshogi_app
 # chesshogi_app
-# chesshogi_app

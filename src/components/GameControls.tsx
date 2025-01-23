@@ -198,7 +198,7 @@ const GameControls: React.FC = () => {
         <CheckboxLabel>Can Place Pieces</CheckboxLabel>
       </CheckboxWrapper>
   
-      <Button onClick={handleInitialize}>Initialize Game</Button>
+      <Button onClick={handleInitialize}>Start Game!</Button>
     </GameControlsWrapper>  
   )
 };

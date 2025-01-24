@@ -3,7 +3,7 @@ import { GameState } from "../types/GameTypes";
 import { InitializeSetting, SendAction } from "../types/apiTypes";
 import { getUserIdFromLocalStorage } from "./uid";
 
-const API_BASE_URL = "http://127.0.0.1:5000"; //"https://chesshogi-api.onrender.com";
+const API_URL: string = process.env.APP_API_URL || "http://127.0.0.1:5000";
 
 // ゲームの初期化
 export const initializeGame = async (
@@ -25,7 +25,7 @@ export const initializeGame = async (
       }
     };
 
-    const response = await axios.post(`${API_BASE_URL}/initialize`, payload);
+    const response = await axios.post(`${API_URL}/initialize`, payload);
     return response;
   } catch (error) {
     console.error("Error initializing game:", error);
@@ -34,7 +34,7 @@ export const initializeGame = async (
 };
 
 export const fetchGameState = async (): Promise<GameState> => {
-  const response = await axios.get(`${API_BASE_URL}/state/${getUserIdFromLocalStorage()}`);
+  const response = await axios.get(`${API_URL}/state/${getUserIdFromLocalStorage()}`);
   return response.data;
 };
 
@@ -49,6 +49,6 @@ export const sendAction = async (
     x: action.x,
     y: action.y
   }
-  const response = await axios.post(`${API_BASE_URL}/action`, payload);
+  const response = await axios.post(`${API_URL}/action`, payload);
   return response.data;
 };

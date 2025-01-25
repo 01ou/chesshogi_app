@@ -1,14 +1,19 @@
-import React, { useState } from "react";
-import { BoardCell, PieceState } from "../types/GameTypes";
+import React, { useEffect, useState } from "react";
+import { BoardCell, PieceState, PlannedMove } from "../types/GameTypes";
 import CapturedPieces from "./CapturedPieces";
 import Board from "./Board";
 import { useGameContext } from "../contexts/GameContext";
 import PromoteDialog from "./PromoteDialog";
+import MovePreview from "./MovePreview";
+import { Piece } from "../types/Pieces";
+import { SendAction } from "../types/apiTypes";
 
 interface GameProps {}
 
 const Game: React.FC<GameProps> = () => {
   const { gameState, takeAction } = useGameContext();
+
+  const [touchedPiece, setTouchedPiece] = useState<Piece | null>(null);
 
   const [selectedPiece, setSelectedPiece] = useState<{
     piece: PieceState;
@@ -19,6 +24,8 @@ const Game: React.FC<GameProps> = () => {
 
   const [selectedCapturedPiece, setSelectedCapturedPiece] = useState<{
     pieceId: string;
+    name: string;
+    team: string;
     legalPlaces: [number, number][];
   } | null>(null);
 
@@ -28,7 +35,31 @@ const Game: React.FC<GameProps> = () => {
     pieceId: string;
   } | null>(null);
 
+  const [plannedMove, setPlannedMove] = useState<(PlannedMove) | null>(null);
+
+  useEffect(() => {
+    if (gameState && plannedMove && gameState.board[plannedMove.y][plannedMove.x]?.id == plannedMove.targetPieceId) {
+      setPlannedMove(null);
+    }
+  }, [gameState])
+
+  const handleAction = (action: SendAction, name: string, team: string, promote: boolean) => {
+    setPlannedMove({
+      ...action,
+      name,
+      team,
+      promote: action.promote || promote,
+    });
+    takeAction(action);
+  } 
+
   const handleSelectAndMove = (x: number, y: number, cell: BoardCell) => {
+    if (cell?.name) {
+      setTouchedPiece(cell.name as Piece);
+    } else {
+      setTouchedPiece(null);
+    }
+
     if (gameState && selectedPiece && selectedPiece.legalMoves.some(([nx, ny]) => nx === x && ny === y)) {
       // 成れるかどうかを確認
       const { size } = gameState.boardSettings;
@@ -43,35 +74,36 @@ const Game: React.FC<GameProps> = () => {
         gameState.turn.player === team;
 
       if (immobileRow && isOverLine(y, immobileRow)) {
-        takeAction({
+        handleAction({
           targetPieceId: selectedPiece.piece.id,
           actionType: "move",
           promote: true,
           x,
           y,
-        })
+        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted)
       } else if (isPromotable) {
         setPromotionDialog({ x, y, pieceId: selectedPiece.piece.id });
+        return;
       } else {
-        takeAction({
+        handleAction({
           targetPieceId: selectedPiece.piece.id,
           actionType: "move",
           promote: false,
           x,
           y,
-        });
+        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted);
       }
 
       setSelectedPiece(null);
       setSelectedCapturedPiece(null);
     } else if (selectedCapturedPiece && selectedCapturedPiece.legalPlaces.some(([nx, ny]) => nx === x && ny === y)) {
-      takeAction({
+      handleAction({
         targetPieceId: selectedCapturedPiece.pieceId,
         actionType: "place",
         promote: false,
         x,
         y,
-      });
+      }, selectedCapturedPiece.name, selectedCapturedPiece.team, false);
       setSelectedPiece(null);
       setSelectedCapturedPiece(null);
     } else if (gameState) {
@@ -92,23 +124,25 @@ const Game: React.FC<GameProps> = () => {
   };
 
   const handlePromoteDecision = (promote: boolean) => {
-    if (promotionDialog) {
-      takeAction({
+    if (promotionDialog && selectedPiece) {
+      handleAction({
         targetPieceId: promotionDialog.pieceId,
         actionType: "move",
         promote,
         x: promotionDialog.x,
         y: promotionDialog.y,
-      });
+      }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted);
     }
+    setSelectedPiece(null);
+    setSelectedCapturedPiece(null);
     setPromotionDialog(null);
   };
 
-  const handleCapturedPieceClick = (pieceId: string, team: string) => {
+  const handleCapturedPieceClick = (pieceId: string, name: string, team: string) => {
     if (gameState && gameState.turn.player === team) {
       if (pieceId !== selectedCapturedPiece?.pieceId) {
         const legalPlaces = gameState.legalActions[pieceId]?.places || [];
-        setSelectedCapturedPiece({ pieceId, legalPlaces });
+        setSelectedCapturedPiece({ pieceId, name, team, legalPlaces });
       } else {
         setSelectedCapturedPiece(null);
       }
@@ -125,7 +159,12 @@ const Game: React.FC<GameProps> = () => {
       {promotionDialog && (
         <PromoteDialog onConfirm={handlePromoteDecision} />
       )}
+      <MovePreview
+        piece={touchedPiece}
+      />
       <Board
+        selectedPieceId={selectedPiece?.piece.id ?? null}
+        plannedMove={plannedMove}
         board={gameState.board}
         moveMarks={selectedPiece?.legalMoves ?? []}
         placeMarks={selectedCapturedPiece?.legalPlaces ?? []}

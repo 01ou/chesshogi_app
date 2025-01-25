@@ -1,4 +1,4 @@
-import { BoardType, PlayerBoardType } from "./apiTypes";
+import { BoardType, PlayerBoardType, SendAction } from "./apiTypes";
 
 export interface PieceState {
   id: string;
@@ -50,4 +50,9 @@ export interface GameState {
 export interface LegalActions {
   moves: { [key: string]: [number, number][] };
   places: { [key: string]: [number, number][] };
+}
+
+export type PlannedMove = SendAction & {
+  name: string;
+  team: string;
 }

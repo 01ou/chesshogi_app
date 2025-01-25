@@ -6,7 +6,7 @@ import { pieceImages } from "../constants/pieceImages";
 
 interface CapturedPiecesProps {
   capturedPieces: { [team: string]: CapturedPiece[] }; // チームごとに持ち駒を管理
-  onPieceClick: (pieceId: string, team: string) => void; // 持ち駒クリック時のイベントハンドラ
+  onPieceClick: (pieceId: string, name: string, team: string) => void; // 持ち駒クリック時のイベントハンドラ
 }
 
 const Container = styled.div`
@@ -76,7 +76,7 @@ const CapturedPieces: React.FC<CapturedPiecesProps> = ({
                 key={piece.name}
                 onClick={() => {
                   if (piece.pieceIds.length > 0) {
-                    onPieceClick(piece.pieceIds[0], team); // 最初のIDを送信
+                    onPieceClick(piece.pieceIds[0], piece.name, team); // 最初のIDを送信
                   }
                 }}
                 $team={team}

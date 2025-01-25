@@ -1,10 +1,12 @@
 import React from "react";
 import styled from "styled-components";
-import { BoardCell } from "../types/GameTypes";
+import { BoardCell, PlannedMove } from "../types/GameTypes";
 import { Piece } from "../types/Pieces";
 import { pieceImages, piecePromoteImages } from "../constants/pieceImages";
 
 interface BoardProps {
+  selectedPieceId: string | null;
+  plannedMove: PlannedMove | null;
   board: BoardCell[][];
   moveMarks: [number, number][];
   placeMarks: [number, number][];
@@ -29,7 +31,7 @@ const StyledBoard = styled.div<{ size: number }>`
 
 const Cell = styled.div<{
   $isOccupied: boolean;
-  $mark: null | "move" | "place";
+  $mark: null | "move" | "place" | "selected";
   $reverse: boolean;
 }>`
   width: 50px; /* 固定サイズ */
@@ -38,17 +40,20 @@ const Cell = styled.div<{
   align-items: center;
   justify-content: center;
   background: ${({ $mark, $isOccupied }) =>
-    $mark ? ($mark === "move" ? "#ffeb3b" : "#eb3bff") : $isOccupied ? "#fff" : "#fff"};
+    $mark ? ($mark === "selected" ? "#ebff3b" : "#ffeb3b") : $isOccupied ? "#fff" : "#fff"};
   cursor: pointer;
   transform: ${({ $reverse }) => ($reverse ? "rotate(180deg)" : "none")};
   transition: background 0.3s;
 `;
 
-const PieceImage = styled.img`
+const PieceImage = styled.img<{ opacity?: number }>`
   max-width: 90%;
   max-height: 90%;
+  opacity: ${({ opacity }) => opacity || 1}; /* デフォルトは不透明 */
+  transition: opacity 0.3s ease; /* 透明度の変更時にアニメーションを追加 */
 `;
-const Board: React.FC<BoardProps> = ({ board, moveMarks, placeMarks, onCellClick }) => {
+
+const Board: React.FC<BoardProps> = ({ selectedPieceId, plannedMove, board, moveMarks, placeMarks, onCellClick }) => {
   const mark = (x: number, y: number) => {
     if (moveMarks.some(([mx, my]) => mx === x && my === y)) {
       return "move";
@@ -57,6 +62,10 @@ const Board: React.FC<BoardProps> = ({ board, moveMarks, placeMarks, onCellClick
     }
     return null;
   };
+
+  const isPlannedMoveCell = (x: number, y: number) => {
+    return plannedMove && plannedMove.x == x && plannedMove.y == y
+  }
 
   return (
     <BoardContainer>
@@ -69,15 +78,21 @@ const Board: React.FC<BoardProps> = ({ board, moveMarks, placeMarks, onCellClick
                 onCellClick(x, y, cell);
               }}
               $isOccupied={!!cell?.name}
-              $mark={mark(x, y)}
-              $reverse={cell?.team === "black"}
+              $mark={cell?.id === selectedPieceId ? "selected" : mark(x, y)}
+              $reverse={(isPlannedMoveCell(x, y) && plannedMove) ? plannedMove.team === "black" : cell?.team === "black"}
             >
-              {cell?.name ? (
+              {(plannedMove && isPlannedMoveCell(x, y)) ? (
+                <PieceImage
+                  src={plannedMove.promote ? piecePromoteImages[plannedMove.name as Piece] : pieceImages[plannedMove.name as Piece]}
+                  opacity={0.3}
+                  alt={plannedMove.name}
+                />
+              ) : (cell?.name) ? (
                 <PieceImage
                   src={cell.promoted ? piecePromoteImages[cell.name as Piece] : pieceImages[cell.name as Piece]}
                   alt={cell.name}
                 />
-              ) : (
+              ) :  (
                 ""
               )}
             </Cell>

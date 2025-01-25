@@ -3,8 +3,7 @@ export type BoardType = "shogi" | "chess";
 export type PlayerShogiBoardType = "shogi" | "wideChess" | "replaceShogi";
 export type PlayerChessBoardType = "chess" | "narrowShogi" | "replaceChess";
 
-export type PlayerBoardType<T extends BoardType> =
-  T extends "shogi" ? PlayerShogiBoardType : PlayerChessBoardType;
+export type PlayerBoardType= PlayerShogiBoardType | PlayerChessBoardType;
 
 export interface SendAction {
   targetPieceId: string;
@@ -16,7 +15,7 @@ export interface SendAction {
 
 export interface PlayerSetting {
   name: string;
-  boardType: PlayerBoardType<BoardType>;
+  boardType: PlayerBoardType;
   piecePlaceable: boolean;
   promotable?: boolean;
 }

@@ -18,14 +18,16 @@ export interface CapturedPiece {
   placeable: boolean;
 }
 
+export interface BoardSettings {
+  type: BoardType;
+  size: number;
+  blackBoard: PlayerBoardType;
+  whiteBoard: PlayerBoardType;
+}
+
 export interface GameState {
   board: BoardCell[][];
-  boardSettings: {
-    type: BoardType;
-    size: number;
-    blackBoard: PlayerBoardType<BoardType>;
-    whiteBoard: PlayerBoardType<BoardType>;
-  }
+  boardSettings: BoardSettings;
   capturedPieces: {
     black: CapturedPiece[];
     white: CapturedPiece[];

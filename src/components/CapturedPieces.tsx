@@ -11,8 +11,9 @@ interface CapturedPiecesProps {
 
 const Container = styled.div`
   display: flex;
-  justify-content: space-between;
-  margin: 20px 0;
+  flex-direction: column;
+  gap: 20px;
+  width: 300px;
 `;
 
 const TeamSection = styled.div`
@@ -28,6 +29,8 @@ const TeamTitle = styled.h3`
 
 const PieceList = styled.div`
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
   gap: 5px;
   margin-top: 10px;

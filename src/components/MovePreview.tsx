@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Piece } from '../types/Pieces';
 import useMovePreview from '../hooks/useMovePreview';
 import { pieceImages, piecePromoteImages } from '../constants/pieceImages';
+import { CellBase } from '../styles/SharedStyles';
+import { DEFAULT_CHESS_BLACK_CELL_COLOR, DEFAULT_CHESS_WHITE_CELL_COLOR, DEFAULT_SHOGI_CELL_COLOR, MOVEABLE_CELL_COLOR, SELECTED_PIECE_CELL_COLOR } from '../constants/color';
 
 interface MovePreviewProps {
   piece: Piece | null;
@@ -15,31 +17,19 @@ const BoardContainer = styled.div`
   grid-template-rows: repeat(5, 50px);
   gap: 2px;
   background-color: #f0d9b5;
-  border: 2px solid #333;
   width: fit-content;
   margin: 0 auto;
 `;
 
-const CellBase = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #888;
+const Cell = styled(CellBase)<{ 
+  isMarked: boolean; 
+  isEdge: boolean; 
+  defaultColor: string; // Optional prop for default color
+}>`
+  background-color: ${({ isMarked, isEdge, defaultColor }) =>
+    isEdge ? "#ff7373" : isMarked ? MOVEABLE_CELL_COLOR : defaultColor};
 `;
 
-const Cell = styled(CellBase)<{ isMarked: boolean; isEdge: boolean }>`
-  background-color: ${({ isMarked, isEdge }) =>
-    isEdge ? '#ff7373' : isMarked ? '#82caff' : '#f0d9b5'};
-`;
-
-const PieceCell = styled(CellBase).attrs(() => ({
-  as: 'img',
-}))`
-  width: 100%; /* セル全体に合わせる */
-  height: 100%; /* セル全体に合わせる */
-  object-fit: contain; /* 画像をセル内に収める */
-  background-color: #f5f542;
-`;
 
 const ControlPanel = styled.div`
   margin-top: 20px;
@@ -53,9 +43,25 @@ const CheckboxLabel = styled.label`
   font-size: 16px;
 `;
 
+const PieceCell = styled(CellBase).attrs(() => ({
+  as: "img",
+}))`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: ${SELECTED_PIECE_CELL_COLOR}
+`;
+
 const MovePreview: React.FC<MovePreviewProps> = ({ piece }) => {
   const { getMovements } = useMovePreview();
   const [isPromoted, setIsPromoted] = useState(false);
+  const [lastPiece, setLastPiece] = useState<Piece | null>(null);
+
+  useEffect(() => {
+    if (piece) {
+      setLastPiece(piece);
+    }
+  }, [piece])
 
   const boardSize = 5;
   const center = Math.floor(boardSize / 2);
@@ -63,6 +69,11 @@ const MovePreview: React.FC<MovePreviewProps> = ({ piece }) => {
     Piece.ShogiRook, Piece.ShogiBishop, Piece.ShogiPhoenix, Piece.ShogiLance,
     Piece.ChessRook, Piece.ChessBishop, Piece.ChessQueen, Piece.ChessLance
   ]
+
+  const getDefaultColor = (x: number, y: number, piece: Piece) => {
+    const isShogi = piece.startsWith("Shogi");
+    return isShogi ? DEFAULT_SHOGI_CELL_COLOR : DEFAULT_CHESS_WHITE_CELL_COLOR
+  }
 
   // 動ける範囲を取得
   const movements = piece ? getMovements(piece, isPromoted) : [];
@@ -104,13 +115,13 @@ const MovePreview: React.FC<MovePreviewProps> = ({ piece }) => {
                   src={(isPromoted && piecePromoteImages[piece]) ? piecePromoteImages[piece] : pieceImages[piece]}
                 />
               ) : (
-                <Cell key={`${x}-${y}`} isMarked={isMarked} isEdge={isEdge} />
+                <Cell key={`${x}-${y}`} isMarked={isMarked} isEdge={isEdge} defaultColor={getDefaultColor(x, y, piece)} />
               )
             )
           ) : (
             Array.from({ length: 5 }, (_, y) =>
               Array.from({ length: 5 }, (_, x) => (
-                <Cell key={`${x}-${y}`} isMarked={false} isEdge={false} />
+                <Cell key={`${x}-${y}`} isMarked={false} isEdge={false} defaultColor={getDefaultColor(x, y, lastPiece ?? Piece.ShogiPawn)} />
               ))
             )  
           )
@@ -121,7 +132,6 @@ const MovePreview: React.FC<MovePreviewProps> = ({ piece }) => {
   
   return (
     <div>
-      <Board />
       <ControlPanel>
         <CheckboxLabel>
           <input
@@ -132,6 +142,7 @@ const MovePreview: React.FC<MovePreviewProps> = ({ piece }) => {
           成り
         </CheckboxLabel>
       </ControlPanel>
+      <Board />
     </div>
   );
 };

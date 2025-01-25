@@ -79,12 +79,12 @@ const GameControls: React.FC = () => {
     const defaultPiecePlaceable = isPiecePlaceableByDefault(selectedBoardType);
     setBlackSetting((prev) => ({
       ...prev,
-      boardType: selectedBoardType === "shogi" ? "shogi" : "chess" as PlayerBoardType<BoardType>,
+      boardType: selectedBoardType === "shogi" ? "shogi" : "chess" as PlayerBoardType,
       piecePlaceable: defaultPiecePlaceable,
     }));
     setWhiteSetting((prev) => ({
       ...prev,
-      boardType: selectedBoardType === "shogi" ? "shogi" : "chess" as PlayerBoardType<BoardType>,
+      boardType: selectedBoardType === "shogi" ? "shogi" : "chess" as PlayerBoardType,
       piecePlaceable: defaultPiecePlaceable,
     }));
   };
@@ -92,20 +92,20 @@ const GameControls: React.FC = () => {
   const handleBlackBoardTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setBlackSetting(prev => ({
       ...prev,
-      boardType: event.target.value as PlayerBoardType<BoardType>,
-      piecePlaceable: isPiecePlaceableByDefault(event.target.value as PlayerBoardType<BoardType>)
+      boardType: event.target.value as PlayerBoardType,
+      piecePlaceable: isPiecePlaceableByDefault(event.target.value as PlayerBoardType)
     }))
   };
 
   const handleWhiteBoardTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setWhiteSetting(prev => ({
       ...prev,
-      boardType: event.target.value as PlayerBoardType<BoardType>,
-      piecePlaceable: isPiecePlaceableByDefault(event.target.value as PlayerBoardType<BoardType>)
+      boardType: event.target.value as PlayerBoardType,
+      piecePlaceable: isPiecePlaceableByDefault(event.target.value as PlayerBoardType)
     }))
   };
 
-  const isPiecePlaceableByDefault = (boardType: PlayerBoardType<BoardType>) => {
+  const isPiecePlaceableByDefault = (boardType: PlayerBoardType) => {
     return boardType === "shogi" || boardType === "narrowShogi" || boardType === "replaceChess";
   };  
 

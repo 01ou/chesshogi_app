@@ -7,14 +7,38 @@ import PromoteDialog from "./PromoteDialog";
 import MovePreview from "./MovePreview";
 import { Piece } from "../types/Pieces";
 import { SendAction } from "../types/apiTypes";
+import styled from "styled-components";
 
 interface GameProps {}
 
+
+export const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+`;
+
+export const Heading = styled.h3`
+  margin-right: 20px;
+`;
+
+export const SidePanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 300px;
+  margin-right: 20px;
+`;
+
+export const BoardWrapper = styled.div`
+  background: #f0f0f0;
+  padding: 16px;
+`;
+
 const Game: React.FC<GameProps> = () => {
   const { gameState, takeAction } = useGameContext();
-
   const [touchedPiece, setTouchedPiece] = useState<Piece | null>(null);
-
   const [selectedPiece, setSelectedPiece] = useState<{
     piece: PieceState;
     x: number;
@@ -38,10 +62,10 @@ const Game: React.FC<GameProps> = () => {
   const [plannedMove, setPlannedMove] = useState<(PlannedMove) | null>(null);
 
   useEffect(() => {
-    if (gameState && plannedMove && gameState.board[plannedMove.y][plannedMove.x]?.id == plannedMove.targetPieceId) {
+    if (gameState && plannedMove && gameState.board[plannedMove.y][plannedMove.x]?.id === plannedMove.targetPieceId) {
       setPlannedMove(null);
     }
-  }, [gameState])
+  }, [gameState, plannedMove]);
 
   const handleAction = (action: SendAction, name: string, team: string, promote: boolean) => {
     setPlannedMove({
@@ -51,7 +75,7 @@ const Game: React.FC<GameProps> = () => {
       promote: action.promote || promote,
     });
     takeAction(action);
-  } 
+  };
 
   const handleSelectAndMove = (x: number, y: number, cell: BoardCell) => {
     if (cell?.name) {
@@ -67,7 +91,7 @@ const Game: React.FC<GameProps> = () => {
 
       const isOverLine = (y: number, line: number) => {
         return team === "white" ? line > y : size - line <= y;
-      }
+      };
 
       const isPromotable = promotable && !promoted && promoteLine &&
         (isOverLine(y, promoteLine) || isOverLine(selectedPiece.y, promoteLine)) &&
@@ -80,7 +104,7 @@ const Game: React.FC<GameProps> = () => {
           promote: true,
           x,
           y,
-        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted)
+        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted);
       } else if (isPromotable) {
         setPromotionDialog({ x, y, pieceId: selectedPiece.piece.id });
         return;
@@ -139,6 +163,7 @@ const Game: React.FC<GameProps> = () => {
   };
 
   const handleCapturedPieceClick = (pieceId: string, name: string, team: string) => {
+    setTouchedPiece(name as Piece);
     if (gameState && gameState.turn.player === team) {
       if (pieceId !== selectedCapturedPiece?.pieceId) {
         const legalPlaces = gameState.legalActions[pieceId]?.places || [];
@@ -155,26 +180,30 @@ const Game: React.FC<GameProps> = () => {
   }
 
   return (
-    <div>
+    <Container>
+      <Heading>Chesshogi</Heading>
+      <SidePanel>
+        <CapturedPieces
+          capturedPieces={gameState.capturedPieces}
+          onPieceClick={handleCapturedPieceClick}
+        />
+        <MovePreview piece={touchedPiece} />
+      </SidePanel>
+      <BoardWrapper>
+        <Board
+          selectedPieceId={selectedPiece?.piece.id ?? null}
+          plannedMove={plannedMove}
+          board={gameState.board}
+          moveMarks={selectedPiece?.legalMoves ?? []}
+          placeMarks={selectedCapturedPiece?.legalPlaces ?? []}
+          boardSettings={gameState.boardSettings}
+          onCellClick={(x, y, cell) => handleSelectAndMove(x, y, cell)}
+        />
+      </BoardWrapper>
       {promotionDialog && (
         <PromoteDialog onConfirm={handlePromoteDecision} />
       )}
-      <MovePreview
-        piece={touchedPiece}
-      />
-      <Board
-        selectedPieceId={selectedPiece?.piece.id ?? null}
-        plannedMove={plannedMove}
-        board={gameState.board}
-        moveMarks={selectedPiece?.legalMoves ?? []}
-        placeMarks={selectedCapturedPiece?.legalPlaces ?? []}
-        onCellClick={(x, y, cell) => handleSelectAndMove(x, y, cell)}
-      />
-      <CapturedPieces
-        capturedPieces={gameState.capturedPieces}
-        onPieceClick={handleCapturedPieceClick}
-      />
-    </div>
+    </Container>
   );
 };
 

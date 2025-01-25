@@ -72,7 +72,7 @@ const CapturedPieces: React.FC<CapturedPiecesProps> = ({
     <Container>
       {["black", "white"].map((team) => (
         <TeamSection key={team}>
-          <TeamTitle>{team === "black" ? "Black" : "White"}</TeamTitle>
+          <TeamTitle>{team === "black" ? "後手" : "先手"}</TeamTitle>
           <PieceList>
             {capturedPieces[team]?.map((piece) => (
               <PieceItem

@@ -67,19 +67,24 @@ const Game: React.FC<GameProps> = () => {
     }
   }, [gameState, plannedMove]);
 
-  const handleAction = (action: SendAction, name: string, team: string, promote: boolean) => {
+  const handleAction = (action: SendAction, name: string, team: string, promote: boolean, rearranged: boolean) => {
     setPlannedMove({
       ...action,
       name,
       team,
       promote: action.promote || promote,
+      rearranged
     });
     takeAction(action);
   };
 
   const handleSelectAndMove = (x: number, y: number, cell: BoardCell) => {
     if (cell?.name) {
-      setTouchedPiece(cell.name as Piece);
+      if (cell.name === Piece.ChessPawn && cell.rearranged) {
+        setTouchedPiece(Piece.ChessCrackedPawn);
+      } else {
+        setTouchedPiece(cell.name as Piece);
+      }
     } else {
       setTouchedPiece(null);
     }
@@ -104,7 +109,7 @@ const Game: React.FC<GameProps> = () => {
           promote: true,
           x,
           y,
-        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted);
+        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted, selectedPiece.piece.rearranged);
       } else if (isPromotable) {
         setPromotionDialog({ x, y, pieceId: selectedPiece.piece.id });
         return;
@@ -115,7 +120,7 @@ const Game: React.FC<GameProps> = () => {
           promote: false,
           x,
           y,
-        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted);
+        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted, selectedPiece.piece.rearranged);
       }
 
       setSelectedPiece(null);
@@ -127,7 +132,7 @@ const Game: React.FC<GameProps> = () => {
         promote: false,
         x,
         y,
-      }, selectedCapturedPiece.name, selectedCapturedPiece.team, false);
+      }, selectedCapturedPiece.name, selectedCapturedPiece.team, false, true);
       setSelectedPiece(null);
       setSelectedCapturedPiece(null);
     } else if (gameState) {
@@ -155,7 +160,7 @@ const Game: React.FC<GameProps> = () => {
         promote,
         x: promotionDialog.x,
         y: promotionDialog.y,
-      }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted);
+      }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted, selectedPiece.piece.rearranged);
     }
     setSelectedPiece(null);
     setSelectedCapturedPiece(null);

@@ -88,7 +88,19 @@ const useMovePreview = () => {
         generateLineMoves(-1, 1)
       ),
     },
-    [Piece.ChessPawn]: { normal: [[1, 0]] },
+    [Piece.ChessPawn]: {
+      normal: [[1, 0]],
+      promoted: combineMoves(
+        generateLineMoves(1, 0),
+        generateLineMoves(-1, 0),
+        generateLineMoves(0, 1),
+        generateLineMoves(0, -1),
+        generateLineMoves(1, 1),
+        generateLineMoves(-1, -1),
+        generateLineMoves(1, -1),
+        generateLineMoves(-1, 1)
+      ),
+    },
     [Piece.ChessKing]: {
       normal: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
     },
@@ -131,7 +143,15 @@ const useMovePreview = () => {
     },
     [Piece.ChessLance]: {
       normal: generateLineMoves(1, 0),
+      promoted: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
     },
+    [Piece.ChessSentinel]: {
+      normal: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
+    },
+    [Piece.ChessCrackedPawn]: {
+      normal: [[1, 0]],
+      promoted: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
+    }
   };
 
   // 動きを取得する関数

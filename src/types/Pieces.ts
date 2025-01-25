@@ -20,5 +20,7 @@ export enum Piece {
   ChessPawn = "ChessPawn",
   ChessPillar = "ChessPillar",
   ChessWisp = "ChessWisp",
-  ChessLance = "ChessLance"
+  ChessLance = "ChessLance",
+  ChessSentinel = "ChessSentinel",
+  ChessCrackedPawn = "ChessCrackedPawn"
 }

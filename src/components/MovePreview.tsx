@@ -67,7 +67,7 @@ const MovePreview: React.FC<MovePreviewProps> = ({ piece }) => {
   const center = Math.floor(boardSize / 2);
   const longMovePieces = [
     Piece.ShogiRook, Piece.ShogiBishop, Piece.ShogiPhoenix, Piece.ShogiLance,
-    Piece.ChessRook, Piece.ChessBishop, Piece.ChessQueen, Piece.ChessLance
+    Piece.ChessRook, Piece.ChessBishop, Piece.ChessQueen, Piece.ChessLance, Piece.ChessPawn
   ]
 
   const getDefaultColor = (piece: Piece) => {

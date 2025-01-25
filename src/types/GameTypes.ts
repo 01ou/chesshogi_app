@@ -7,6 +7,7 @@ export interface PieceState {
   promotable: boolean;
   promoteLine: number;
   immobileRow: number | null;
+  rearranged: boolean;
   team: "black" | "white";
 }
 
@@ -57,4 +58,5 @@ export interface LegalActions {
 export type PlannedMove = SendAction & {
   name: string;
   team: string;
+  rearranged: boolean;
 }

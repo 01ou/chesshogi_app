@@ -31,6 +31,9 @@ import chessPawn from "../assets/images/pieces/chess_pawn.png";
 import chessPillar from "../assets/images/pieces/chess_pillar.png";
 import chessWish from "../assets/images/pieces/chess_wisp.png";
 import chessLance from "../assets/images/pieces/chess_lance.png";
+import chessSentinel from "../assets/images/pieces/chess_sentinel.png";
+import chessCrackedPawn from "../assets/images/pieces/chess_cracked_pawn.png";
+import chessPawnQueen from "../assets/images/pieces/chess_pawn_queen.png";
 
 // 通常駒の画像マッピング
 const pieceImages: { [key in Piece]: string } = {
@@ -55,7 +58,9 @@ const pieceImages: { [key in Piece]: string } = {
   [Piece.ChessPawn]: chessPawn,
   [Piece.ChessPillar]: chessPillar,
   [Piece.ChessWisp]: chessWish,
-  [Piece.ChessLance]: chessLance
+  [Piece.ChessLance]: chessLance,
+  [Piece.ChessSentinel]: chessSentinel,
+  [Piece.ChessCrackedPawn]: chessCrackedPawn,
 };
 
 // 成り駒の画像マッピング (将棋のみ)
@@ -68,7 +73,9 @@ const piecePromoteImages: { [key in Piece]?: string } = {
   [Piece.ShogiSilver]: shogiPromSilver,
   [Piece.ShogiJumper]: shogiPromJumper,
   [Piece.ShogiPhoenix]: shogiPromPhoenix,
-  [Piece.ChessPawn]: chessQueen,
+  [Piece.ChessPawn]: chessPawnQueen,
+  [Piece.ChessLance]: chessSentinel,
+  [Piece.ChessCrackedPawn]: chessSentinel,
 };
 
 export { pieceImages, piecePromoteImages };

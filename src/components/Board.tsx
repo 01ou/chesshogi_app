@@ -80,6 +80,13 @@ const Board: React.FC<BoardProps> = ({
     return plannedMove && plannedMove.x === x && plannedMove.y === y;
   };
 
+  const getPieceImage = (piece: Piece, promoted: boolean, rearranged: boolean) => {
+    if (piece === Piece.ChessPawn && rearranged) {
+      return promoted ? piecePromoteImages[Piece.ChessCrackedPawn] : pieceImages[Piece.ChessCrackedPawn];
+    }
+    return promoted ? piecePromoteImages[piece] : pieceImages[piece];
+  }
+
   return (
     <BoardContainer>
       <StyledBoard size={board.length}>
@@ -97,13 +104,13 @@ const Board: React.FC<BoardProps> = ({
             >
               {plannedMove && isPlannedMoveCell(x, y) ? (
                 <PieceImage
-                  src={plannedMove.promote ? piecePromoteImages[plannedMove.name as Piece] : pieceImages[plannedMove.name as Piece]}
+                  src={getPieceImage(plannedMove.name as Piece, plannedMove.promote, plannedMove.rearranged)}
                   opacity={0.3}
                   alt={plannedMove.name}
                 />
               ) : cell?.name ? (
                 <PieceImage
-                  src={cell.promoted ? piecePromoteImages[cell.name as Piece] : pieceImages[cell.name as Piece]}
+                  src={getPieceImage(cell.name as Piece, cell.promoted, cell.rearranged)}
                   alt={cell.name}
                 />
               ) : (

@@ -4,7 +4,7 @@ import { Piece } from '../types/Pieces';
 import useMovePreview from '../hooks/useMovePreview';
 import { pieceImages, piecePromoteImages } from '../constants/pieceImages';
 import { CellBase } from '../styles/SharedStyles';
-import { DEFAULT_CHESS_BLACK_CELL_COLOR, DEFAULT_CHESS_WHITE_CELL_COLOR, DEFAULT_SHOGI_CELL_COLOR, MOVEABLE_CELL_COLOR, SELECTED_PIECE_CELL_COLOR } from '../constants/color';
+import { DEFAULT_CHESS_WHITE_CELL_COLOR, DEFAULT_SHOGI_CELL_COLOR, MOVEABLE_CELL_COLOR, SELECTED_PIECE_CELL_COLOR } from '../constants/color';
 
 interface MovePreviewProps {
   piece: Piece | null;
@@ -70,7 +70,7 @@ const MovePreview: React.FC<MovePreviewProps> = ({ piece }) => {
     Piece.ChessRook, Piece.ChessBishop, Piece.ChessQueen, Piece.ChessLance
   ]
 
-  const getDefaultColor = (x: number, y: number, piece: Piece) => {
+  const getDefaultColor = (piece: Piece) => {
     const isShogi = piece.startsWith("Shogi");
     return isShogi ? DEFAULT_SHOGI_CELL_COLOR : DEFAULT_CHESS_WHITE_CELL_COLOR
   }
@@ -115,13 +115,13 @@ const MovePreview: React.FC<MovePreviewProps> = ({ piece }) => {
                   src={(isPromoted && piecePromoteImages[piece]) ? piecePromoteImages[piece] : pieceImages[piece]}
                 />
               ) : (
-                <Cell key={`${x}-${y}`} isMarked={isMarked} isEdge={isEdge} defaultColor={getDefaultColor(x, y, piece)} />
+                <Cell key={`${x}-${y}`} isMarked={isMarked} isEdge={isEdge} defaultColor={getDefaultColor(piece)} />
               )
             )
           ) : (
             Array.from({ length: 5 }, (_, y) =>
               Array.from({ length: 5 }, (_, x) => (
-                <Cell key={`${x}-${y}`} isMarked={false} isEdge={false} defaultColor={getDefaultColor(x, y, lastPiece ?? Piece.ShogiPawn)} />
+                <Cell key={`${x}-${y}`} isMarked={false} isEdge={false} defaultColor={getDefaultColor(lastPiece ?? Piece.ShogiPawn)} />
               ))
             )  
           )

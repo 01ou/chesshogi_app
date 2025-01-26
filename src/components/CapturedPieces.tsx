@@ -34,6 +34,7 @@ const PieceList = styled.div`
   flex-wrap: wrap;
   gap: 5px;
   margin-top: 10px;
+  min-height: 50px;
 `;
 
 const PieceItem = styled.div<{ $team: string }>`
@@ -72,7 +73,7 @@ const CapturedPieces: React.FC<CapturedPiecesProps> = ({
     <Container>
       {["black", "white"].map((team) => (
         <TeamSection key={team}>
-          <TeamTitle>{team === "black" ? "後手" : "先手"}</TeamTitle>
+          <TeamTitle>{team === "black" ? "後手駒" : "先手駒"}</TeamTitle>
           <PieceList>
             {capturedPieces[team]?.map((piece) => (
               <PieceItem

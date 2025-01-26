@@ -1,26 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { BoardCell, PieceState, PlannedMove } from "../types/GameTypes";
-import CapturedPieces from "./CapturedPieces";
-import Board from "./Board";
-import { useGameContext } from "../contexts/GameContext";
-import PromoteDialog from "./PromoteDialog";
-import MovePreview from "./MovePreview";
-import { Piece } from "../types/Pieces";
-import { SendAction } from "../types/apiTypes";
+// Game.tsx
+import React from "react";
+import { useGameLogic } from "../hooks/useGameLogic";
 import styled from "styled-components";
-
-interface GameProps {}
-
+import Board from "./Board";
+import CapturedPieces from "./CapturedPieces";
+import MovePreview from "./MovePreview";
+import PromoteDialog from "./PromoteDialog";
 
 export const Container = styled.div`
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
+  width: 100%;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    align-items: center;
+  }
+`;
+
+export const HeadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    align-items: center;
+  }
 `;
 
 export const Heading = styled.h3`
   margin-right: 20px;
+
+  @media (max-width: 768px) {
+    margin-right: 0;
+  }
 `;
 
 export const SidePanel = styled.div`
@@ -29,156 +46,39 @@ export const SidePanel = styled.div`
   justify-content: center;
   width: 300px;
   margin-right: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: row;
+    width: 100%;
+    margin-right: 0;
+    margin-top: 20px;
+  }
 `;
 
 export const BoardWrapper = styled.div`
   background: #f0f0f0;
   padding: 16px;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    padding: 8px;
+  }
 `;
 
-const Game: React.FC<GameProps> = () => {
-  const { gameState, takeAction } = useGameContext();
-  const [touchedPiece, setTouchedPiece] = useState<Piece | null>(null);
-  const [selectedPiece, setSelectedPiece] = useState<{
-    piece: PieceState;
-    x: number;
-    y: number;
-    legalMoves: [number, number][];
-  } | null>(null);
-
-  const [selectedCapturedPiece, setSelectedCapturedPiece] = useState<{
-    pieceId: string;
-    name: string;
-    team: string;
-    legalPlaces: [number, number][];
-  } | null>(null);
-
-  const [promotionDialog, setPromotionDialog] = useState<{
-    x: number;
-    y: number;
-    pieceId: string;
-  } | null>(null);
-
-  const [plannedMove, setPlannedMove] = useState<(PlannedMove) | null>(null);
-
-  useEffect(() => {
-    if (gameState && plannedMove && gameState.board[plannedMove.y][plannedMove.x]?.id === plannedMove.targetPieceId) {
-      setPlannedMove(null);
-    }
-  }, [gameState, plannedMove]);
-
-  const handleAction = (action: SendAction, name: string, team: string, promote: boolean, rearranged: boolean) => {
-    setPlannedMove({
-      ...action,
-      name,
-      team,
-      promote: action.promote || promote,
-      rearranged
-    });
-    takeAction(action);
-  };
-
-  const handleSelectAndMove = (x: number, y: number, cell: BoardCell) => {
-    if (cell?.name) {
-      if (cell.name === Piece.ChessPawn && cell.rearranged) {
-        setTouchedPiece(Piece.ChessCrackedPawn);
-      } else {
-        setTouchedPiece(cell.name as Piece);
-      }
-    } else {
-      setTouchedPiece(null);
-    }
-
-    if (gameState && selectedPiece && selectedPiece.legalMoves.some(([nx, ny]) => nx === x && ny === y)) {
-      // 成れるかどうかを確認
-      const { size } = gameState.boardSettings;
-      const { team, promoted, promotable, promoteLine, immobileRow } = selectedPiece.piece;
-
-      const isOverLine = (y: number, line: number) => {
-        return team === "white" ? line > y : size - line <= y;
-      };
-
-      const isPromotable = promotable && !promoted && promoteLine &&
-        (isOverLine(y, promoteLine) || isOverLine(selectedPiece.y, promoteLine)) &&
-        gameState.turn.player === team;
-
-      if (immobileRow && isOverLine(y, immobileRow)) {
-        handleAction({
-          targetPieceId: selectedPiece.piece.id,
-          actionType: "move",
-          promote: true,
-          x,
-          y,
-        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted, selectedPiece.piece.rearranged);
-      } else if (isPromotable) {
-        setPromotionDialog({ x, y, pieceId: selectedPiece.piece.id });
-        return;
-      } else {
-        handleAction({
-          targetPieceId: selectedPiece.piece.id,
-          actionType: "move",
-          promote: false,
-          x,
-          y,
-        }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted, selectedPiece.piece.rearranged);
-      }
-
-      setSelectedPiece(null);
-      setSelectedCapturedPiece(null);
-    } else if (selectedCapturedPiece && selectedCapturedPiece.legalPlaces.some(([nx, ny]) => nx === x && ny === y)) {
-      handleAction({
-        targetPieceId: selectedCapturedPiece.pieceId,
-        actionType: "place",
-        promote: false,
-        x,
-        y,
-      }, selectedCapturedPiece.name, selectedCapturedPiece.team, false, true);
-      setSelectedPiece(null);
-      setSelectedCapturedPiece(null);
-    } else if (gameState) {
-      setSelectedPiece(() => {
-        if (cell && cell.team === gameState.turn.player) {
-          return {
-            piece: cell,
-            x,
-            y,
-            legalMoves: gameState.legalActions[cell.id].moves,
-          };
-        } else {
-          return null;
-        }
-      });
-      setSelectedCapturedPiece(null);
-    }
-  };
-
-  const handlePromoteDecision = (promote: boolean) => {
-    if (promotionDialog && selectedPiece) {
-      handleAction({
-        targetPieceId: promotionDialog.pieceId,
-        actionType: "move",
-        promote,
-        x: promotionDialog.x,
-        y: promotionDialog.y,
-      }, selectedPiece.piece.name, selectedPiece.piece.team, selectedPiece.piece.promoted, selectedPiece.piece.rearranged);
-    }
-    setSelectedPiece(null);
-    setSelectedCapturedPiece(null);
-    setPromotionDialog(null);
-  };
-
-  const handleCapturedPieceClick = (pieceId: string, name: string, team: string) => {
-    setTouchedPiece(name as Piece);
-    if (gameState && gameState.turn.player === team) {
-      if (pieceId !== selectedCapturedPiece?.pieceId) {
-        const legalPlaces = gameState.legalActions[pieceId]?.places || [];
-        setSelectedCapturedPiece({ pieceId, name, team, legalPlaces });
-      } else {
-        setSelectedCapturedPiece(null);
-      }
-      setSelectedPiece(null);
-    }
-  };
+const Game: React.FC = () => {
+  const {
+    isAIResponds,
+    gameState,
+    touchedPiece,
+    selectedPiece,
+    selectedCapturedPiece,
+    promotionDialog,
+    plannedMove,
+    setIsAIResponds,
+    handleSelectAndMove,
+    handlePromoteDecision,
+    handleCapturedPieceClick
+  } = useGameLogic();
 
   if (!gameState) {
     return "初期化を行ってください";
@@ -186,7 +86,17 @@ const Game: React.FC<GameProps> = () => {
 
   return (
     <Container>
-      <Heading>Chesshogi</Heading>
+      <HeadingContainer>
+        <Heading>Chesshogi</Heading>
+        <label>
+          <input
+            type="checkbox"
+            checked={isAIResponds}
+            onChange={(e) => setIsAIResponds(e.target.checked)}
+          />
+          AIを使用する
+        </label>
+      </HeadingContainer>
       <SidePanel>
         <CapturedPieces
           capturedPieces={gameState.capturedPieces}

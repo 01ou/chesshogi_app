@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { GameState } from "../types/GameTypes";
-import { InitializeSetting, SendAction } from "../types/apiTypes";
+import { InitializeSetting, ResponseData, SendAction } from "../types/apiTypes";
 import { getUserIdFromLocalStorage } from "./uid";
 
 const API_URL: string = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -40,8 +40,9 @@ export const fetchGameState = async (): Promise<GameState> => {
 
 export const sendAction = async (
   action: SendAction
-): Promise<GameState> => {
+): Promise<ResponseData> => {
   const payload: SendAction & { userId: string } = {
+    isAIResponds: action.isAIResponds,
     userId: getUserIdFromLocalStorage(),
     targetPieceId: action.targetPieceId,
     actionType: action.actionType,

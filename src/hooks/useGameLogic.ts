@@ -32,7 +32,14 @@ export const useGameLogic = () => {
     const targetPositionPieceId = (gameState && plannedMove) ? gameState.board[plannedMove.y][plannedMove.x]?.id : undefined;
     const aiPieceId = (gameState && aiAction) ? gameState.board[aiAction.to[1]][aiAction.to[0]]?.id : undefined;
 
-    if (gameState && plannedMove && (targetPositionPieceId === plannedMove.targetPieceId || aiPieceId === targetPositionPieceId)) {
+    console.log(targetPositionPieceId, aiPieceId, plannedMove?.targetPieceId);
+    
+
+    if (
+      gameState && plannedMove &&
+      (targetPositionPieceId || aiPieceId) &&
+      (targetPositionPieceId === plannedMove.targetPieceId || aiPieceId === targetPositionPieceId)
+    ) {
       setPlannedMove(null);
     }
   }, [gameState, aiAction, plannedMove]);

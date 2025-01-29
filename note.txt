@@ -1,2 +1,9 @@
 VITE_API_URL=https://chesshogi-api.onrender.com
 VITE_API_URL=http://127.0.0.1:5000
+
+cd server
+myenv\Scripts\activate
+python app.py
+
+cd client
+npm run dev

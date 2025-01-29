@@ -1,5 +1,5 @@
 // Game.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useGameLogic } from "../hooks/useGameLogic";
 import styled from "styled-components";
 import Board from "./Board";
@@ -65,9 +65,18 @@ export const BoardWrapper = styled.div`
   }
 `;
 
+const Select = styled.select`
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+`;
+
 const Game: React.FC = () => {
   const {
     isAIResponds,
+    depth,
     gameState,
     touchedPiece,
     selectedPiece,
@@ -75,19 +84,48 @@ const Game: React.FC = () => {
     promotionDialog,
     plannedMove,
     setIsAIResponds,
+    setDepth,
     handleSelectAndMove,
     handlePromoteDecision,
     handleCapturedPieceClick
   } = useGameLogic();
 
+  const [enemyMovableCountMap, setEnemyMovablesCount] = useState<Record<string, number>>({});
+  const [guide, setGuide] = useState(false);
+
   if (!gameState) {
     return "初期化を行ってください";
   }
 
+
+  useEffect(() => {
+    const enemyMovablesArray = Object.values(gameState.legalActions)
+      .filter(value => value.team !== gameState.turn.player)
+      .map(value => [...value.moves, ...value.allyBlocks])
+      .flat();
+
+    // 座標ごとの数をカウントする辞書を作成
+    const enemyMovableCountMap = enemyMovablesArray.reduce((acc, [x, y]) => {
+      const key = `${x},${y}`; // 座標をキーとして使用
+      acc[key] = acc[key] ? acc[key] + 1 : 1; // 既に存在する場合はカウントを増やし、なければ1に設定
+      return acc;
+    }, {} as Record<string, number>);
+
+    setEnemyMovablesCount(enemyMovableCountMap);
+  }, [gameState]);
+  
   return (
     <Container>
       <HeadingContainer>
         <Heading>Chesshogi</Heading>
+        <label>
+          <input
+            type="checkbox"
+            checked={guide}
+            onChange={(e) => setGuide(e.target.checked)}
+          />
+          移動範囲のガイド
+        </label>
         <label>
           <input
             type="checkbox"
@@ -96,6 +134,13 @@ const Game: React.FC = () => {
           />
           AIを使用する
         </label>
+        <Select value={depth} onChange={(e) => setDepth(Number(e.target.value))}>
+          {[0, 1, 2, 3].map((depth) => (
+            <option key={depth} value={depth}>
+              AI Level: {depth}
+            </option>
+          ))}
+        </Select>
       </HeadingContainer>
       <SidePanel>
         <CapturedPieces
@@ -111,6 +156,7 @@ const Game: React.FC = () => {
           board={gameState.board}
           moveMarks={selectedPiece?.legalMoves ?? []}
           placeMarks={selectedCapturedPiece?.legalPlaces ?? []}
+          enemyMovableCountMap={guide ? enemyMovableCountMap : {}}
           boardSettings={gameState.boardSettings}
           onCellClick={(x, y, cell) => handleSelectAndMove(x, y, cell)}
         />

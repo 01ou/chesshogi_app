@@ -43,6 +43,7 @@ export const sendAction = async (
 ): Promise<ResponseData> => {
   const payload: SendAction & { userId: string } = {
     isAIResponds: action.isAIResponds,
+    depth: action.depth,
     userId: getUserIdFromLocalStorage(),
     targetPieceId: action.targetPieceId,
     actionType: action.actionType,

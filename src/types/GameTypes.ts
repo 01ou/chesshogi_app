@@ -43,6 +43,8 @@ export interface GameState {
     black: boolean;
   };
   legalActions: Record<string, {
+    team: "black" | "white";
+    allyBlocks: [number, number][];
     moves: [number, number][];
     places: [number, number][];
   }>

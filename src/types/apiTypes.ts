@@ -9,6 +9,7 @@ export type PlayerBoardType= PlayerShogiBoardType | PlayerChessBoardType;
 
 export interface SendAction {
   isAIResponds: boolean;
+  depth: number;
   targetPieceId: string;
   actionType: "move" | "place";
   promote: boolean;

@@ -27,13 +27,11 @@ export const useGameLogic = () => {
   } | null>(null);
   const [plannedMove, setPlannedMove] = useState<(PlannedMove) | null>(null);
   const [isAIResponds, setIsAIResponds] = useState(false);
+  const [depth, setDepth] = useState(3);
 
   useEffect(() => {
     const targetPositionPieceId = (gameState && plannedMove) ? gameState.board[plannedMove.y][plannedMove.x]?.id : undefined;
     const aiPieceId = (gameState && aiAction) ? gameState.board[aiAction.to[1]][aiAction.to[0]]?.id : undefined;
-
-    console.log(targetPositionPieceId, aiPieceId, plannedMove?.targetPieceId);
-    
 
     if (
       gameState && plannedMove &&
@@ -82,6 +80,7 @@ export const useGameLogic = () => {
       if (immobileRow && isOverLine(y, immobileRow)) {
         handleAction({
           isAIResponds,
+          depth,
           targetPieceId: selectedPiece.piece.id,
           actionType: "move",
           promote: true,
@@ -94,6 +93,7 @@ export const useGameLogic = () => {
       } else {
         handleAction({
           isAIResponds,
+          depth,
           targetPieceId: selectedPiece.piece.id,
           actionType: "move",
           promote: false,
@@ -107,6 +107,7 @@ export const useGameLogic = () => {
     } else if (selectedCapturedPiece && selectedCapturedPiece.legalPlaces.some(([nx, ny]) => nx === x && ny === y)) {
       handleAction({
         isAIResponds,
+        depth,
         targetPieceId: selectedCapturedPiece.pieceId,
         actionType: "place",
         promote: false,
@@ -136,6 +137,7 @@ export const useGameLogic = () => {
     if (promotionDialog && selectedPiece) {
       handleAction({
         isAIResponds,
+        depth,
         targetPieceId: promotionDialog.pieceId,
         actionType: "move",
         promote,
@@ -163,6 +165,7 @@ export const useGameLogic = () => {
 
   return {
     isAIResponds,
+    depth,
     gameState,
     touchedPiece,
     selectedPiece,
@@ -170,6 +173,7 @@ export const useGameLogic = () => {
     promotionDialog,
     plannedMove,
     setIsAIResponds,
+    setDepth,
     handleAction,
     handleSelectAndMove,
     handlePromoteDecision,

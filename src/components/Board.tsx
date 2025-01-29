@@ -19,6 +19,7 @@ interface BoardProps {
   board: BoardCell[][];
   moveMarks: [number, number][];
   placeMarks: [number, number][];
+  enemyMovableCountMap: Record<string, number>
   boardSettings: BoardSettings;
   onCellClick: (x: number, y: number, cell: BoardCell) => void;
 }
@@ -31,6 +32,7 @@ export const StyledBoard = styled(BoardContainer)<{ size: number }>`
 export const Cell = styled(CellBase)<{
   $isOccupied: boolean;
   $mark: null | "move" | "place" | "selected";
+  $isEnemyMoveableCount: number;
   $reverse: boolean;
   $cellColors: CellColors; // 外部から渡される色
 }>`
@@ -47,6 +49,19 @@ export const Cell = styled(CellBase)<{
   cursor: pointer;
   transform: ${({ $reverse }) => ($reverse ? "rotate(180deg)" : "none")};
   transition: background 0.3s;
+  border: ${({ $isEnemyMoveableCount }) => {
+    if ($isEnemyMoveableCount === 1) {
+      return "3px solid #a7db72"; // 初期色
+    }
+    if ($isEnemyMoveableCount === 2) {
+      return "3px solid #bf72db"; // 色を変更
+    }
+    if ($isEnemyMoveableCount >= 3) {
+      return "3px solid #db7295"; // 色をさらに変更
+    }
+    return "none"; // カウントが0の場合はボーダーなし
+  }};
+  box-sizing: border-box;
 `;
 
 const PieceImage = styled.img<{ opacity?: number }>`
@@ -62,6 +77,7 @@ const Board: React.FC<BoardProps> = ({
   board,
   moveMarks,
   placeMarks,
+  enemyMovableCountMap,
   boardSettings,
   onCellClick,
 }) => {
@@ -101,6 +117,7 @@ const Board: React.FC<BoardProps> = ({
               $mark={cell?.id === selectedPieceId ? "selected" : mark(x, y)}
               $reverse={isPlannedMoveCell(x, y) ? plannedMove?.team === "black" : cell?.team === "black"}
               $cellColors={getCellColors(x, y)}
+              $isEnemyMoveableCount={enemyMovableCountMap[`${x},${y}`]}
             >
               {plannedMove && isPlannedMoveCell(x, y) ? (
                 <PieceImage
